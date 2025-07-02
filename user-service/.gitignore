@@ -1,0 +1,55 @@
+### Java ###
+*.class
+*.jar
+*.war
+*.ear
+
+### Maven ###
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+### Spring Boot 설정 파일 ###
+application.yml
+application.properties
+src/main/resources/application.yml
+src/main/resources/application.properties
+
+logback-spring.xml
+src/main/resources/logback-spring.xml
+
+### Log & Temp Files ###
+logs/
+*.log
+*.tmp
+*.swp
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### IDEs ###
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+### Eclipse ###
+.classpath
+.project
+.settings/
+
+### IntelliJ ###
+.idea/
+*.iml
+out/
+
+### Test Reports ###
+test-output/
