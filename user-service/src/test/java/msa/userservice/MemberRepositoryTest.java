@@ -1,3 +1,5 @@
+package msa.userservice;
+
 import msa.userservice.UserServiceApplication;
 import msa.userservice.application.port.in.SignUpUseCase;
 import msa.userservice.domain.Member;
