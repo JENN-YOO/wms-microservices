@@ -1,7 +1,8 @@
 package msa.userservice.application.port.in;
 
-import msa.userservice.domain.Member;
+import msa.userservice.adapter.in.web.SignUpRequest;
+import msa.userservice.adapter.in.web.SignUpResponse;
 
 public interface SignUpUseCase {
-    Member signUp(Member member);
+    SignUpResponse signUp(SignUpRequest signUpRequest);
 }

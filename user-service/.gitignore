@@ -49,7 +49,6 @@ Thumbs.db
 ### IntelliJ ###
 .idea/
 *.iml
-out/
 
 ### Test Reports ###
 test-output/
