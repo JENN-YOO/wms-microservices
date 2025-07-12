@@ -102,5 +102,14 @@ public class JwtTokenProvider implements InitializingBean {
     public Claims getClaims(String token) {
         return Jwts.parser().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
-}
 
+
+    public String getLoginId(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.getSubject();
+    }
+}
