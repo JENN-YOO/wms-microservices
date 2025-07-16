@@ -26,4 +26,14 @@ public class SignUpController {
             return ResponseEntity.badRequest().body(signUpResponse);
         }
     }
+
+    @PostMapping("/mybatis")
+    public ResponseEntity<SignUpResponse> signUpWithMyBatis(@RequestBody SignUpRequest signUpRequest) {
+        SignUpResponse signUpResponse = signUpUseCase.signUpWithMapper(signUpRequest);
+        if (signUpResponse.isSuccess()) {
+            return ResponseEntity.ok(signUpResponse);
+        } else {
+            return ResponseEntity.badRequest().body(signUpResponse);
+        }
+    }
 }

@@ -1,4 +1,4 @@
-package msa.userservice.adapter.out.persistence;
+package msa.userservice.adapter.out.persistence.jpa;
 
 import msa.userservice.application.port.out.MemberPersistencePort;
 import msa.userservice.domain.Member;

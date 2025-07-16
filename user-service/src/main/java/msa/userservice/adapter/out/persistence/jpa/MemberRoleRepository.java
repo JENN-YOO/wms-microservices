@@ -1,4 +1,4 @@
-package msa.userservice.adapter.out.persistence;
+package msa.userservice.adapter.out.persistence.jpa;
 
 import msa.userservice.domain.MemberRole;
 import msa.userservice.domain.MemberRoleId;
