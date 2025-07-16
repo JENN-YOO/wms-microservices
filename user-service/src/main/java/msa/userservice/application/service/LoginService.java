@@ -2,7 +2,7 @@ package msa.userservice.application.service;
 
 import msa.userservice.adapter.in.web.LoginRequest;
 import msa.userservice.adapter.in.web.LoginResponse;
-import msa.userservice.adapter.out.persistence.jpa.MemberRepository;
+import msa.userservice.adapter.out.persistence.MemberRepository;
 import msa.userservice.application.port.in.LoginUseCase;
 import msa.userservice.domain.Member;
 import msa.userservice.jwt.JwtTokenProvider;

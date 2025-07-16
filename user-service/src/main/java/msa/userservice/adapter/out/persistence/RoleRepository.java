@@ -1,4 +1,4 @@
-package msa.userservice.adapter.out.persistence.jpa;
+package msa.userservice.adapter.out.persistence;
 
 import msa.userservice.domain.Role;
 import org.springframework.data.jpa.repository.JpaRepository;

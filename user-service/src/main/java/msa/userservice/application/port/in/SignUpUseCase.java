@@ -5,6 +5,4 @@ import msa.userservice.adapter.in.web.SignUpResponse;
 
 public interface SignUpUseCase {
     SignUpResponse signUp(SignUpRequest signUpRequest);
-
-    SignUpResponse signUpWithMapper(SignUpRequest signUpRequest);
 }
