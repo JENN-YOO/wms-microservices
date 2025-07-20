@@ -13,32 +13,4 @@ public class SignUpRequest {
     private String phoneNo;
     private String companyName;
     private String bizNo;
-
-    public String getLoginId() {
-        return loginId;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPhoneNo() {
-        return phoneNo;
-    }
-
-    public String getCompanyName() {
-        return companyName;
-    }
-
-    public String getBizNo() {
-        return bizNo;
-    }
 }
