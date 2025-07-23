@@ -39,6 +39,10 @@ public class LoginService implements LoginUseCase {
             Member member = memberRepository.findByLoginId(loginRequest.getUsername())
                     .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 아이디 입니다."));
 
+            if(member.getStatusCode() != 1) {
+                throw new IllegalArgumentException("활성화되지 않은 계정입니다.");
+            }
+
             if (!passwordEncoder.matches(loginRequest.getPassword(), member.getPassword())) {
                 throw new IllegalArgumentException("잘못된 비밀번호입니다.");
             }

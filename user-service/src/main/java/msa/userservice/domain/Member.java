@@ -1,10 +1,15 @@
 package msa.userservice.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tb_member")
+@Getter
+@Setter
 public class Member {
 
     @Id
@@ -51,115 +56,7 @@ public class Member {
     @Column(name = "mod_dt")
     private LocalDateTime modDt = LocalDateTime.now();
 
-    public Long getMemberId() {
-        return memberId;
-    }
+    @Column(name = "status_code")
+    private Integer statusCode = 0;
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
-    }
-
-    public String getMemberType() {
-        return memberType;
-    }
-
-    public void setMemberType(String memberType) {
-        this.memberType = memberType;
-    }
-
-    public String getLoginId() {
-        return loginId;
-    }
-
-    public void setLoginId(String loginId) {
-        this.loginId = loginId;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhoneNo() {
-        return phoneNo;
-    }
-
-    public void setPhoneNo(String phoneNo) {
-        this.phoneNo = phoneNo;
-    }
-
-    public String getCompanyName() {
-        return companyName;
-    }
-
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
-    }
-
-    public String getClientCode() {
-        return clientCode;
-    }
-
-    public void setClientCode(String clientCode) {
-        this.clientCode = clientCode;
-    }
-
-    public String getBizNo() {
-        return bizNo;
-    }
-
-    public void setBizNo(String bizNo) {
-        this.bizNo = bizNo;
-    }
-
-    public char getUseYn() {
-        return useYn;
-    }
-
-    public void setUseYn(char useYn) {
-        this.useYn = useYn;
-    }
-
-    public LocalDateTime getLastLoginDt() {
-        return lastLoginDt;
-    }
-
-    public void setLastLoginDt(LocalDateTime lastLoginDt) {
-        this.lastLoginDt = lastLoginDt;
-    }
-
-    public LocalDateTime getRegDt() {
-        return regDt;
-    }
-
-    public void setRegDt(LocalDateTime regDt) {
-        this.regDt = regDt;
-    }
-
-    public LocalDateTime getModDt() {
-        return modDt;
-    }
-
-    public void setModDt(LocalDateTime modDt) {
-        this.modDt = modDt;
-    }
 }

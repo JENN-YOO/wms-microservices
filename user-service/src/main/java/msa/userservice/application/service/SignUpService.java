@@ -37,9 +37,10 @@ public class SignUpService implements SignUpUseCase {
         member.setClientCode(signUpRequest.getClientCode());
         member.setBizNo(signUpRequest.getBizNo());
         member.setMemberType("USER"); // 기본값 설정
+        member.setStatusCode(0);
 
         memberRepository.save(member);
 
-        return new SignUpResponse(true, "회원가입 성공");
+        return new SignUpResponse(true, "회원가입 성공! 이메일 인증을 완료해 주세요.");
     }
 }
