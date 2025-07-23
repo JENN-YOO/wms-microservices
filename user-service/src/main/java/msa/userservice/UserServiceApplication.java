@@ -12,7 +12,7 @@ public class UserServiceApplication {
     private static final Logger logger = LoggerFactory.getLogger(UserServiceApplication.class);
     public static void main(String[] args) {
         SpringApplication.run(UserServiceApplication.class, args);
-        logger.info("이현재 테스트");
+        logger.info("유지원 테스트");
     }
 
 }

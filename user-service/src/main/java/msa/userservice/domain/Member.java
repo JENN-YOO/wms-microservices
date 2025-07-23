@@ -33,6 +33,9 @@ public class Member {
     @Column(name = "company_name", length = 200)
     private String companyName;
 
+    @Column(name = "client_code", length = 10)
+    private String clientCode;
+
     @Column(name = "biz_no", length = 20)
     private String bizNo;
 
@@ -110,6 +113,14 @@ public class Member {
 
     public void setCompanyName(String companyName) {
         this.companyName = companyName;
+    }
+
+    public String getClientCode() {
+        return clientCode;
+    }
+
+    public void setClientCode(String clientCode) {
+        this.clientCode = clientCode;
     }
 
     public String getBizNo() {

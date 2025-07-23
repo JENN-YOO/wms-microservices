@@ -34,6 +34,7 @@ public class SignUpService implements SignUpUseCase {
         member.setEmail(signUpRequest.getEmail());
         member.setPhoneNo(signUpRequest.getPhoneNo());
         member.setCompanyName(signUpRequest.getCompanyName());
+        member.setClientCode(signUpRequest.getClientCode());
         member.setBizNo(signUpRequest.getBizNo());
         member.setMemberType("USER"); // 기본값 설정
 

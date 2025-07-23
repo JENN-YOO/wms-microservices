@@ -12,6 +12,7 @@ public class SignUpRequest {
     private String email;
     private String phoneNo;
     private String companyName;
+    private String clientCode;
     private String bizNo;
 
     public String getLoginId() {
@@ -34,9 +35,9 @@ public class SignUpRequest {
         return phoneNo;
     }
 
-    public String getCompanyName() {
-        return companyName;
-    }
+    public String getCompanyName() {return companyName; }
+
+    public String getClientCode() {return clientCode; }
 
     public String getBizNo() {
         return bizNo;
