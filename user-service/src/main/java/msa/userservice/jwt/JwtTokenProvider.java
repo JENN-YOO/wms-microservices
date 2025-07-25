@@ -86,6 +86,7 @@ public class JwtTokenProvider implements InitializingBean {
     public boolean validateToken(String token) {
         try {
             Jwts.parser().setSigningKey(key).build().parseClaimsJws(token);
+            logger.info("유효한 JWT 토큰입니다.");
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             logger.info("잘못된 JWT 서명입니다.", e);

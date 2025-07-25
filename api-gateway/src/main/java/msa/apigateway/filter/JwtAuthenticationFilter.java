@@ -61,7 +61,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 
             String authorizationHeader = request.getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
             String token = authorizationHeader.replace("Bearer ", "");
-
+            System.out.printf("Received JWT Token: %s%n", token);
             // Redis 블랙리스트 확인
             if (redisTemplate.opsForValue().get(token) != null) {
                 return onError(exchange, "JWT Token is blacklisted", HttpStatus.UNAUTHORIZED);
