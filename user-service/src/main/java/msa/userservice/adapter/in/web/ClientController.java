@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/client/register")
+@RequestMapping("/client")
 @RequiredArgsConstructor
 public class ClientController {
     private static final Logger logger = LoggerFactory.getLogger(ClientController.class);
 
     private final ClientRegisterUseCase clientRegisterUseCase;
 
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest registerRequest) {
         RegisterResponse registerResponse = clientRegisterUseCase.register(registerRequest);
 

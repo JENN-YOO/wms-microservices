@@ -2,18 +2,18 @@ package msa.userservice.application.service;
 
 import msa.userservice.adapter.in.web.ProfileResponse;
 import msa.userservice.adapter.out.persistence.MemberRepository;
-import msa.userservice.application.port.in.GetProfileUseCase;
+import msa.userservice.application.port.in.ProfileUseCase;
 import msa.userservice.domain.Member;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
-public class GetProfileService implements GetProfileUseCase {
+public class ProfileService implements ProfileUseCase {
 
     private final MemberRepository memberRepository;
 
-    public GetProfileService(MemberRepository memberRepository) {
+    public ProfileService(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
 
