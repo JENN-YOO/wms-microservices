@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 public class ClientMaster {
 
     @Id
-    @Column(name = "client_code", length = 24)
-    private String clientCode;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int clientCode;
 
     @Column(name = "business_code", length = 24)
     private String businessCode;
