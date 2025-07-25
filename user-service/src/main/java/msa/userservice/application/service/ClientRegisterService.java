@@ -24,6 +24,7 @@ public class ClientRegisterService implements ClientRegisterUseCase {
     public RegisterResponse register(RegisterRequest registerRequest) {
 
         ClientMaster clientMaster = new ClientMaster();
+        clientMaster.setClientCode(registerRequest.getClientCode());
         clientMaster.setBusinessCode(registerRequest.getBusinessCode());
         clientMaster.setClientName(registerRequest.getClientName());
         clientMaster.setClientBusinessNumber(registerRequest.getClientBusinessNumber());

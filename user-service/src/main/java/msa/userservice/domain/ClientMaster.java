@@ -11,6 +11,7 @@ public class ClientMaster {
     @Id
     @Column(name = "client_code", length = 24)
     private String clientCode;
+
     @Column(name = "business_code", length = 24)
     private String businessCode;
 
