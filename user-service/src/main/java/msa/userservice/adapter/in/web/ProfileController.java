@@ -1,30 +1,41 @@
 package msa.userservice.adapter.in.web;
 
-import msa.userservice.application.port.in.ProfileUseCase;
+import lombok.RequiredArgsConstructor;
+import msa.userservice.application.port.in.ProfileCommandUseCase;
+import msa.userservice.application.port.in.ProfileQueryUseCase;
 import msa.userservice.jwt.JwtTokenProvider;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/profile")
+@RequiredArgsConstructor
 public class ProfileController {
 
-    private final ProfileUseCase profileUseCase;
+    private final ProfileQueryUseCase profileUseCase;
     private final JwtTokenProvider jwtTokenProvider;
+    private final ProfileCommandUseCase profileCommandUseCase;
 
-    public ProfileController(ProfileUseCase profileUseCase, JwtTokenProvider jwtTokenProvider) {
-        this.profileUseCase = profileUseCase;
-        this.jwtTokenProvider = jwtTokenProvider;
-    }
-
-    @GetMapping
+    @GetMapping("/me")
     public ResponseEntity<ProfileResponse> getProfile(@RequestHeader("Authorization") String authorizationHeader) {
         String token = authorizationHeader.replace("Bearer ", "");
         String loginId = jwtTokenProvider.getLoginId(token);
         ProfileResponse profileResponse = profileUseCase.getProfile(loginId);
         return ResponseEntity.ok(profileResponse);
+    }
+
+    @PatchMapping("/update")
+    public ResponseEntity<UpdateProfileResponse> updateProfile(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody UpdateProfileRequest request) {
+        String token = authorizationHeader.replace("Bearer ", "");
+        String loginId = jwtTokenProvider.getLoginId(token);
+        UpdateProfileResponse response = profileCommandUseCase.updateProfile(loginId, request);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 }
