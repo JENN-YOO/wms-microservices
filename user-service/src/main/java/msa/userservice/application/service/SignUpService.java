@@ -1,9 +1,11 @@
 package msa.userservice.application.service;
 
+import lombok.RequiredArgsConstructor;
 import msa.userservice.adapter.in.web.SignUpRequest;
 import msa.userservice.adapter.in.web.SignUpResponse;
 import msa.userservice.application.port.in.SignUpUseCase;
 import msa.userservice.adapter.out.persistence.MemberRepository;
+import msa.userservice.application.port.out.MemberPersistencePort;
 import msa.userservice.domain.Member;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,19 +13,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class SignUpService implements SignUpUseCase {
 
-    private final MemberRepository memberRepository;
+    private final MemberPersistencePort memberPersistencePort;
     private final PasswordEncoder passwordEncoder;
 
-    public SignUpService(MemberRepository memberRepository, PasswordEncoder passwordEncoder) {
-        this.memberRepository = memberRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
     public SignUpResponse signUp(SignUpRequest signUpRequest) {
-        if (memberRepository.findByLoginId(signUpRequest.getLoginId()).isPresent()) {
+        if (memberPersistencePort.findByLoginId(signUpRequest.getLoginId()).isPresent()) {
             return new SignUpResponse(false, "이미 존재하는 아이디입니다.");
         }
 
@@ -39,7 +38,7 @@ public class SignUpService implements SignUpUseCase {
         member.setMemberType("USER"); // 기본값 설정
         member.setStatusCode(0);
 
-        memberRepository.save(member);
+        memberPersistencePort.save(member);
 
         return new SignUpResponse(true, "회원가입 성공! 이메일 인증을 완료해 주세요.");
     }
