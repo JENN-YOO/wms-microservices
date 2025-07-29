@@ -1,4 +1,4 @@
-package msa.userservice.adapter.in.web;
+package msa.userservice.adapter.in.web.controller;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,6 +1,8 @@
-package msa.userservice.adapter.in.web;
+package msa.userservice.adapter.in.web.controller;
 
 import lombok.RequiredArgsConstructor;
+import msa.userservice.adapter.in.web.dto.RegisterRequest;
+import msa.userservice.adapter.in.web.dto.RegisterResponse;
 import msa.userservice.application.port.in.ClientRegisterUseCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

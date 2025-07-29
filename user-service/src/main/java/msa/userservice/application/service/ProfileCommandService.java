@@ -1,8 +1,8 @@
 package msa.userservice.application.service;
 
 import lombok.RequiredArgsConstructor;
-import msa.userservice.adapter.in.web.UpdateProfileRequest;
-import msa.userservice.adapter.in.web.UpdateProfileResponse;
+import msa.userservice.adapter.in.web.dto.UpdateProfileRequest;
+import msa.userservice.adapter.in.web.dto.UpdateProfileResponse;
 import msa.userservice.application.port.in.ProfileCommandUseCase;
 import msa.userservice.application.port.out.MemberPersistencePort;
 import msa.userservice.domain.Member;

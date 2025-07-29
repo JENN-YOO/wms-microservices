@@ -1,4 +1,4 @@
-package msa.userservice.adapter.in.web;
+package msa.userservice.adapter.in.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

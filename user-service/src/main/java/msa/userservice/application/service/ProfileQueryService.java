@@ -1,8 +1,7 @@
 package msa.userservice.application.service;
 
 import lombok.RequiredArgsConstructor;
-import msa.userservice.adapter.in.web.ProfileResponse;
-import msa.userservice.adapter.out.persistence.MemberRepository;
+import msa.userservice.adapter.in.web.dto.ProfileResponse;
 import msa.userservice.application.port.in.ProfileQueryUseCase;
 import msa.userservice.application.port.out.MemberPersistencePort;
 import msa.userservice.domain.Member;

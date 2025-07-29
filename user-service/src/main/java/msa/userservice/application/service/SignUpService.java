@@ -1,10 +1,9 @@
 package msa.userservice.application.service;
 
 import lombok.RequiredArgsConstructor;
-import msa.userservice.adapter.in.web.SignUpRequest;
-import msa.userservice.adapter.in.web.SignUpResponse;
+import msa.userservice.adapter.in.web.dto.SignUpRequest;
+import msa.userservice.adapter.in.web.dto.SignUpResponse;
 import msa.userservice.application.port.in.SignUpUseCase;
-import msa.userservice.adapter.out.persistence.MemberRepository;
 import msa.userservice.application.port.out.MemberPersistencePort;
 import msa.userservice.domain.Member;
 import org.springframework.security.crypto.password.PasswordEncoder;

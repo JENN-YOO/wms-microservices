@@ -1,4 +1,4 @@
-package msa.userservice.adapter.in.web;
+package msa.userservice.adapter.in.web.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,18 +1,18 @@
-package msa.userservice.adapter.in.web;
+package msa.userservice.adapter.in.web.dto;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class RegisterResponse {
+public class SignUpResponse {
     private boolean success;
     private String message;
 
-    public RegisterResponse() {
+    public SignUpResponse() {
     }
 
-    public RegisterResponse(boolean success, String message) {
+    public SignUpResponse(boolean success, String message) {
         this.success = success;
         this.message = message;
     }

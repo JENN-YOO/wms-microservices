@@ -1,4 +1,4 @@
-package msa.userservice.adapter.in.web;
+package msa.userservice.adapter.in.web.controller;
 
 import lombok.RequiredArgsConstructor;
 import msa.userservice.adapter.out.persistence.MemberRepository;

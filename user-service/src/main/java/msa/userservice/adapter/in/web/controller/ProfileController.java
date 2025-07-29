@@ -1,6 +1,9 @@
-package msa.userservice.adapter.in.web;
+package msa.userservice.adapter.in.web.controller;
 
 import lombok.RequiredArgsConstructor;
+import msa.userservice.adapter.in.web.dto.ProfileResponse;
+import msa.userservice.adapter.in.web.dto.UpdateProfileRequest;
+import msa.userservice.adapter.in.web.dto.UpdateProfileResponse;
 import msa.userservice.application.port.in.ProfileCommandUseCase;
 import msa.userservice.application.port.in.ProfileQueryUseCase;
 import msa.userservice.jwt.JwtTokenProvider;

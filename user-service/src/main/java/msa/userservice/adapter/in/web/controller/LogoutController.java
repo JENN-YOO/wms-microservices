@@ -1,6 +1,5 @@
-package msa.userservice.adapter.in.web;
+package msa.userservice.adapter.in.web.controller;
 
-import lombok.RequiredArgsConstructor;
 import msa.userservice.application.port.in.LogoutUseCase;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

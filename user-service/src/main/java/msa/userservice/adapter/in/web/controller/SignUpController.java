@@ -1,6 +1,8 @@
-package msa.userservice.adapter.in.web;
+package msa.userservice.adapter.in.web.controller;
 
 import lombok.RequiredArgsConstructor;
+import msa.userservice.adapter.in.web.dto.SignUpRequest;
+import msa.userservice.adapter.in.web.dto.SignUpResponse;
 import msa.userservice.application.port.in.EmailAuthUseCase;
 import msa.userservice.application.port.in.SignUpUseCase;
 import org.slf4j.Logger;
