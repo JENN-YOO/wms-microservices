@@ -6,6 +6,8 @@ import msa.userservice.adapter.in.web.dto.LoginResponse;
 import msa.userservice.adapter.out.persistence.MemberRepository;
 import msa.userservice.adapter.out.persistence.MemberRoleRepository;
 import msa.userservice.application.port.in.LoginUseCase;
+import msa.userservice.application.port.out.MemberPersistencePort;
+import msa.userservice.application.port.out.MemberRolePersistencePort;
 import msa.userservice.domain.Member;
 import msa.userservice.domain.MemberRole;
 import msa.userservice.jwt.JwtTokenProvider;
@@ -32,6 +34,10 @@ public class LoginService implements LoginUseCase {
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisTemplate<String, String> redisTemplate;
     private final MemberRoleRepository memberRoleRepository;
+
+    //TODO: MemberRoleRepository를 사용하지 않고, MemberRolePersistencePort를 사용하도록 변경
+    private final MemberPersistencePort memberPersistencePort;
+    private final MemberRolePersistencePort memberRolePersistencePort;
 
 
     @Override

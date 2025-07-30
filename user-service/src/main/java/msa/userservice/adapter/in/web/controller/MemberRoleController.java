@@ -5,6 +5,7 @@ import msa.userservice.adapter.in.web.dto.MemberRoleRequest;
 import msa.userservice.adapter.in.web.dto.MemberRoleResponse;
 import msa.userservice.application.port.in.MemberRoleCommandUseCase;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +18,7 @@ public class MemberRoleController {
 
     private final MemberRoleCommandUseCase memberRoleCommandUseCase;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/assign")
     public ResponseEntity<MemberRoleResponse> assignRoleToMember(@RequestBody MemberRoleRequest request) {
         if (request.getMemberId() == null || request.getRoleId() == null) {
