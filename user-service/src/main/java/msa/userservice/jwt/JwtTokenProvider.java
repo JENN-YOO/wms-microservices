@@ -113,4 +113,13 @@ public class JwtTokenProvider implements InitializingBean {
                 .getBody();
         return claims.getSubject();
     }
+
+    public String getRoles(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.get(AUTHORITIES_KEY, String.class); // AUTHORITIES_KEY == "auth"
+    }
 }

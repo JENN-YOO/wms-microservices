@@ -10,6 +10,9 @@ import msa.userservice.jwt.JwtTokenProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.List;
+
 @RestController
 @RequestMapping("/profile")
 @RequiredArgsConstructor
@@ -23,7 +26,13 @@ public class ProfileController {
     public ResponseEntity<ProfileResponse> getProfile(@RequestHeader("Authorization") String authorizationHeader) {
         String token = authorizationHeader.replace("Bearer ", "");
         String loginId = jwtTokenProvider.getLoginId(token);
-        ProfileResponse profileResponse = profileUseCase.getProfile(loginId);
+
+        // 추가: roles 추출
+        String rolesString = jwtTokenProvider.getRoles(token); // "ADMIN,USER" 등
+        List<String> roles = Arrays.asList(rolesString.split(",")); // List<String> 변환
+
+
+        ProfileResponse profileResponse = profileUseCase.getProfile(loginId, roles);
         return ResponseEntity.ok(profileResponse);
     }
 
