@@ -1,9 +1,15 @@
 package msa.userservice.domain;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(name = "tb_member_role")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MemberRole {
 
     @EmbeddedId
@@ -18,28 +24,4 @@ public class MemberRole {
     @MapsId("roleId")
     @JoinColumn(name = "role_id")
     private Role role;
-
-    public MemberRoleId getId() {
-        return id;
-    }
-
-    public void setId(MemberRoleId id) {
-        this.id = id;
-    }
-
-    public Member getMember() {
-        return member;
-    }
-
-    public void setMember(Member member) {
-        this.member = member;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
 }
