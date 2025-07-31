@@ -1,5 +1,7 @@
-package msa.userservice.adapter.in.web.dto;
+package msa.userservice.adapter.in.web.controller;
 
+import msa.userservice.adapter.in.web.dto.LoginRequest;
+import msa.userservice.adapter.in.web.dto.LoginResponse;
 import msa.userservice.application.port.in.LoginUseCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
