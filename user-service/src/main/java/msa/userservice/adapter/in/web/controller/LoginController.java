@@ -3,8 +3,7 @@ package msa.userservice.adapter.in.web.controller;
 import msa.userservice.adapter.in.web.dto.LoginRequest;
 import msa.userservice.adapter.in.web.dto.LoginResponse;
 import msa.userservice.application.port.in.LoginUseCase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import msa.userservice.config.MDCHelper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,8 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/login")
 public class LoginController {
 
-    private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
-
     private final LoginUseCase loginUseCase;
 
     public LoginController(LoginUseCase loginUseCase) {
@@ -25,7 +22,7 @@ public class LoginController {
 
     @PostMapping
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
-        logger.info("Login request received for username: {}", loginRequest.getUsername());
+        MDCHelper.appendDebug(LoginController.class, "로그인 요청 수신. Username: " + loginRequest.getUsername());
         LoginResponse loginResponse = loginUseCase.login(loginRequest);
         
         return ResponseEntity.ok(loginResponse);
