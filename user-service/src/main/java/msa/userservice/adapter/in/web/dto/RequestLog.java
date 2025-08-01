@@ -12,29 +12,34 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RequestLog {
-    private String requestId;                    // 고유 식별자
+    private String requestId;
     private RequestInfo request;
     private ResponseInfo response;
-    private Map<String, Object> metadata;        // MDC 등 동적 필드
+    private Map<String, Object> metadata;
+    private String exception;
 
-    public static RequestLog of(String requestId,
-                                ContentCachingRequestWrapper req,
-                                ContentCachingResponseWrapper res,
-                                LocalDateTime reqAt,
-                                LocalDateTime resAt,
-                                long elapseTime,
-                                Map<String, Object> metadata) {
+    // 👇 이제 exception까지 포함해서 한 번에 객체 생성!
+    public static RequestLog of(
+            String requestId,
+            ContentCachingRequestWrapper req,
+            ContentCachingResponseWrapper res,
+            LocalDateTime reqAt,
+            LocalDateTime resAt,
+            long elapseTime,
+            Map<String, Object> metadata,
+            String exception
+    ) {
         return RequestLog.builder()
                 .requestId(requestId)
                 .request(RequestInfo.of(req, reqAt))
                 .response(ResponseInfo.of(res, elapseTime, resAt))
                 .metadata(metadata)
+                .exception(exception) // exception까지 builder에서!
                 .build();
     }
 

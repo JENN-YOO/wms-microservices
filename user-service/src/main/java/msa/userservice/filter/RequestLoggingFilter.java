@@ -1,6 +1,5 @@
 package msa.userservice.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,13 +20,12 @@ import java.util.UUID;
 
 public class RequestLoggingFilter extends OncePerRequestFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger("ELK_LOGGER"); // logback에서 ELK_LOGGER로 지정
+    private static final Logger logger = LoggerFactory.getLogger("ELK_LOGGER");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 고유 requestId 생성 및 MDC/ThreadContext 등록
         String requestId = UUID.randomUUID().toString();
         MDCHelper.init(requestId);
 
@@ -35,14 +33,17 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
 
         LocalDateTime requestAt = LocalDateTime.now();
+        Exception caughtException = null;
 
         try {
             filterChain.doFilter(wrappedRequest, wrappedResponse);
+        } catch (Exception ex) {
+            caughtException = ex;
+            throw ex;
         } finally {
             LocalDateTime responseAt = LocalDateTime.now();
             long elapseTime = Duration.between(requestAt, responseAt).toMillis();
 
-            // 로그 구조화: JSON 형태 (requestId + metadata + ...)
             RequestLog requestLog = RequestLog.of(
                     requestId,
                     wrappedRequest,
@@ -50,12 +51,40 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
                     requestAt,
                     responseAt,
                     elapseTime,
-                    MDCHelper.getMetadata()
+                    MDCHelper.getMetadata(),
+                    (caughtException != null) ? getStackTraceAsString(caughtException) : null
             );
-            logger.info("REQUEST_LOG", StructuredArguments.fields(requestLog));
+
+            // 👇 아래처럼 keyValue로 각각 넣으면 복합 객체도 JSON으로 잘 찍힘!
+            if (caughtException != null) {
+                logger.error("REQUEST_LOG",
+                        StructuredArguments.keyValue("requestId", requestLog.getRequestId()),
+                        StructuredArguments.keyValue("request", requestLog.getRequest()),
+                        StructuredArguments.keyValue("response", requestLog.getResponse()),
+                        StructuredArguments.keyValue("metadata", requestLog.getMetadata()),
+                        StructuredArguments.keyValue("exception", requestLog.getException())
+                );
+            } else {
+                logger.info("REQUEST_LOG",
+                        StructuredArguments.keyValue("requestId", requestLog.getRequestId()),
+                        StructuredArguments.keyValue("request", requestLog.getRequest()),
+                        StructuredArguments.keyValue("response", requestLog.getResponse()),
+                        StructuredArguments.keyValue("metadata", requestLog.getMetadata()),
+                        StructuredArguments.keyValue("exception", requestLog.getException())
+                );
+            }
 
             wrappedResponse.copyBodyToResponse();
             MDCHelper.clear();
         }
+    }
+
+    private static String getStackTraceAsString(Throwable ex) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ex.toString()).append("\n");
+        for (StackTraceElement elem : ex.getStackTrace()) {
+            sb.append("\tat ").append(elem).append("\n");
+        }
+        return sb.toString();
     }
 }
