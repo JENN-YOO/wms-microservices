@@ -1,11 +1,11 @@
-package msa.userservice.filter;
+package msa.productservice.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import msa.userservice.adapter.in.web.dto.RequestLog;
-import msa.userservice.config.MDCHelper;
+import msa.productservice.config.MDCHelper;
+import msa.productservice.adapter.in.web.dto.RequestLog;
 import net.logstash.logback.argument.StructuredArguments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
