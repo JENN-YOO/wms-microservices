@@ -1,12 +1,10 @@
 package msa.userservice.application.service;
 
-import msa.userservice.adapter.in.web.RegisterRequest;
-import msa.userservice.adapter.in.web.RegisterResponse;
+import msa.userservice.adapter.in.web.dto.RegisterRequest;
+import msa.userservice.adapter.in.web.dto.RegisterResponse;
 import msa.userservice.adapter.out.persistence.ClientMasterRepository;
 import msa.userservice.application.port.in.ClientRegisterUseCase;
 import msa.userservice.domain.ClientMaster;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
