@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class ClientRegisterService implements ClientRegisterUseCase {
 
     private final ClientMasterRepository clientMasterRepository;
@@ -24,7 +24,6 @@ public class ClientRegisterService implements ClientRegisterUseCase {
     public RegisterResponse register(RegisterRequest registerRequest) {
 
         ClientMaster clientMaster = new ClientMaster();
-        clientMaster.setClientCode(registerRequest.getClientCode());
         clientMaster.setBusinessCode(registerRequest.getBusinessCode());
         clientMaster.setClientName(registerRequest.getClientName());
         clientMaster.setClientBusinessNumber(registerRequest.getClientBusinessNumber());

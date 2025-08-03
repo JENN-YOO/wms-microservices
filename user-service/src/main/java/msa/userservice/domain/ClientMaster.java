@@ -66,11 +66,11 @@ public class ClientMaster {
     @Column(name = "created_by", length = 48)
     private String createdBy;
 
-    public String getClientCode() {
+    public int getClientCode() {
         return clientCode;
     }
 
-    public void setClientCode(String clientCode) {
+    public void setClientCode(int clientCode) {
         this.clientCode = clientCode;
     }
 
