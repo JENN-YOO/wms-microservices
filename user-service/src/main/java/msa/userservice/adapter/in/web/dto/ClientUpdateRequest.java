@@ -5,7 +5,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class RegisterRequest {
+public class ClientUpdateRequest
+{
+    private int clientCode;
     private String businessCode;
     private String clientName;
     private String clientBusinessNumber;
