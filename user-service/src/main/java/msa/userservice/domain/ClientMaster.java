@@ -1,11 +1,19 @@
 package msa.userservice.domain;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+
 @Entity
 @Table(name = "tb_client_master")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ClientMaster {
 
     @Id
@@ -66,155 +74,5 @@ public class ClientMaster {
     @Column(name = "created_by", length = 48)
     private String createdBy;
 
-    public int getClientCode() {
-        return clientCode;
-    }
 
-    public void setClientCode(int clientCode) {
-        this.clientCode = clientCode;
-    }
-
-    public String getBusinessCode() {
-        return businessCode;
-    }
-
-    public void setBusinessCode(String businessCode) {
-        this.businessCode = businessCode;
-    }
-
-    public String getClientName() {
-        return clientName;
-    }
-
-    public void setClientName(String clientName) {
-        this.clientName = clientName;
-    }
-
-    public String getClientBusinessNumber() {
-        return clientBusinessNumber;
-    }
-
-    public void setClientBusinessNumber(String clientBusinessNumber) {
-        this.clientBusinessNumber = clientBusinessNumber;
-    }
-
-    public String getMainPhoneEncrypted() {
-        return mainPhoneEncrypted;
-    }
-
-    public void setMainPhoneEncrypted(String mainPhoneEncrypted) {
-        this.mainPhoneEncrypted = mainPhoneEncrypted;
-    }
-
-    public String getFaxNumber() {
-        return faxNumber;
-    }
-
-    public void setFaxNumber(String faxNumber) {
-        this.faxNumber = faxNumber;
-    }
-
-    public String getCeoName() {
-        return ceoName;
-    }
-
-    public void setCeoName(String ceoName) {
-        this.ceoName = ceoName;
-    }
-
-    public String getManagerName() {
-        return managerName;
-    }
-
-    public void setManagerName(String managerName) {
-        this.managerName = managerName;
-    }
-
-    public String getManagerMobileEncrypted() {
-        return managerMobileEncrypted;
-    }
-
-    public void setManagerMobileEncrypted(String managerMobileEncrypted) {
-        this.managerMobileEncrypted = managerMobileEncrypted;
-    }
-
-    public String getManagerEmailEncrypted() {
-        return managerEmailEncrypted;
-    }
-
-    public void setManagerEmailEncrypted(String managerEmailEncrypted) {
-        this.managerEmailEncrypted = managerEmailEncrypted;
-    }
-
-    public String getZipcode() {
-        return zipcode;
-    }
-
-    public void setZipcode(String zipcode) {
-        this.zipcode = zipcode;
-    }
-
-    public String getAddressBase() {
-        return addressBase;
-    }
-
-    public void setAddressBase(String addressBase) {
-        this.addressBase = addressBase;
-    }
-
-    public String getAddressDetail() {
-        return addressDetail;
-    }
-
-    public void setAddressDetail(String addressDetail) {
-        this.addressDetail = addressDetail;
-    }
-
-    public String getRemarks() {
-        return remarks;
-    }
-
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
-    }
-
-    public String getServiceStatus() {
-        return serviceStatus;
-    }
-
-    public void setServiceStatus(String serviceStatus) {
-        this.serviceStatus = serviceStatus;
-    }
-
-    public LocalDate getServiceStartDate() {
-        return serviceStartDate;
-    }
-
-    public void setServiceStartDate(LocalDate serviceStartDate) {
-        this.serviceStartDate = serviceStartDate;
-    }
-
-    public LocalDate getServiceEndDate() {
-        return serviceEndDate;
-    }
-
-    public void setServiceEndDate(LocalDate serviceEndDate) {
-        this.serviceEndDate = serviceEndDate;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
 }
