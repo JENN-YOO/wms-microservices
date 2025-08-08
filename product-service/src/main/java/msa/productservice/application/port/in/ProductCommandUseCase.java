@@ -1,15 +1,15 @@
 package msa.productservice.application.port.in;
 
-import msa.productservice.adapter.in.web.dto.ProductRequest;
+import msa.productservice.adapter.in.web.dto.ProductCreateRequest;
 import msa.productservice.adapter.in.web.dto.ProductResponse;
 
 public interface ProductCommandUseCase {
     /**
      * 상품 등록
-     * @param productRequest 상품 등록 요청 정보
+     * @param productCreateRequest 상품 등록 요청 정보
      * @return 성공 여부와 메시지
      */
-    ProductResponse registerProduct(ProductRequest productRequest, String UserID, String roleName);
+    ProductResponse registerProduct(ProductCreateRequest productCreateRequest, String UserID, String roleName);
 
     /**
      * 상품 수정

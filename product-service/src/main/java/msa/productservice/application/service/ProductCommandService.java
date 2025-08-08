@@ -1,7 +1,7 @@
-package msa.productservice.application.port.service;
+package msa.productservice.application.service;
 
 import lombok.RequiredArgsConstructor;
-import msa.productservice.adapter.in.web.dto.ProductRequest;
+import msa.productservice.adapter.in.web.dto.ProductCreateRequest;
 import msa.productservice.adapter.in.web.dto.ProductResponse;
 import msa.productservice.application.port.in.ProductCommandUseCase;
 import msa.productservice.application.port.out.ProductPersistencePort;
@@ -20,7 +20,7 @@ public class ProductCommandService implements ProductCommandUseCase {
     private static final Logger log = LoggerFactory.getLogger(ProductCommandService.class);
 
     @Override
-    public ProductResponse registerProduct(ProductRequest req, String userId, String roleName) {
+    public ProductResponse registerProduct(ProductCreateRequest req, String userId, String roleName) {
         log.info("[상품등록][시작] 상품명: {}, 등록자: {}", req.getProductName(), userId);
         MDCHelper.appendDebug(this.getClass(), "상품 등록 요청. 상품명: " + req.getProductName() + ", 등록자: " + userId);
 

@@ -9,9 +9,9 @@ import lombok.*;
 public class ProductResponse {
     private boolean success;
     private String message;
-    private ProductRequest data;  // 상품 핵심 정보
+    private ProductCreateRequest data;  // 상품 핵심 정보
 
-    public static ProductResponse success(String message, ProductRequest dto) {
+    public static ProductResponse success(String message, ProductCreateRequest dto) {
         return ProductResponse.builder()
                 .success(true)
                 .message(message)

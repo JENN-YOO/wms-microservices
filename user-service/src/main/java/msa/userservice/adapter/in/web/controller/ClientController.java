@@ -5,12 +5,17 @@ import msa.userservice.adapter.in.web.dto.ClientUpdateRequest;
 import msa.userservice.adapter.in.web.dto.ClientUpdateResponse;
 import msa.userservice.adapter.in.web.dto.RegisterRequest;
 import msa.userservice.adapter.in.web.dto.RegisterResponse;
+import msa.userservice.adapter.out.persistence.ClientMasterRepository;
+import msa.userservice.application.port.in.ClientQueryUseCase;
 import msa.userservice.application.port.in.ClientRegisterUseCase;
 import msa.userservice.application.port.in.ClientUpdateUseCase;
+import msa.userservice.domain.ClientMaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/client")
@@ -20,6 +25,8 @@ public class ClientController {
 
     private final ClientRegisterUseCase clientRegisterUseCase;
     private final ClientUpdateUseCase clientUpdateUseCase;
+    private final ClientQueryUseCase clientQueryUseCase;
+    private final ClientMasterRepository clientMasterRepository;
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest registerRequest) {
@@ -43,5 +50,19 @@ public class ClientController {
             logger.warn("화주 업데이트 실패 : {}", clientUpdateResponse.getMessage());
         }
         return ResponseEntity.badRequest().body(clientUpdateResponse);
+    }
+
+    @GetMapping("/{clientCode}/name")
+    public ResponseEntity<String> getClientName(@PathVariable("clientCode") int clientCode) {
+        String clientName = clientQueryUseCase.getClientName(clientCode);
+        if (clientName == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(clientName);
+    }
+
+    @GetMapping("/all")
+    public List<ClientMaster> getAllClients() {
+        return clientMasterRepository.findAll();
     }
 }
