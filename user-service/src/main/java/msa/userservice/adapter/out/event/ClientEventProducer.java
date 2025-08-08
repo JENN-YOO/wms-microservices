@@ -25,6 +25,7 @@ public class ClientEventProducer implements ClientEventPublisherPort {
         message.put("serviceStartDate", event.getServiceStartDate() != null ? event.getServiceStartDate().toString() : null);
         message.put("serviceEndDate", event.getServiceEndDate() != null ? event.getServiceEndDate().toString() : null);
 
-        kafkaTemplate.send(TOPIC, message);
+        // 1. Key값(clientCode 등) 지정해서 **동일 client 이벤트는 항상 같은 파티션**에!
+        kafkaTemplate.send(TOPIC, String.valueOf(event.getClientCode()), message);
     }
 }
