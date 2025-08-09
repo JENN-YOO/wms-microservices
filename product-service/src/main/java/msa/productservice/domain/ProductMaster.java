@@ -19,7 +19,7 @@ public class ProductMaster {
     private Long productCode;   // 오토 인크리즈 PK
 
     @Column(name = "client_code", nullable = false, length = 24)
-    private String clientCode;
+    private Long clientCode;
 
     @Column(name = "product_type", nullable = false, length = 1)
     private String productType;

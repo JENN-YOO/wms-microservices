@@ -10,6 +10,6 @@ import lombok.*;
 public class ProductWithClientDto {
     private Long productCode;
     private String productName;
-    private String clientCode;
+    private Long clientCode;
     private String clientName;
 }

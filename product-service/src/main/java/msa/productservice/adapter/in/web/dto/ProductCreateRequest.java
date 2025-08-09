@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class ProductCreateRequest {
-    private String clientCode;
+    private Long clientCode;
     private String productType;
     private String productRole;
     private String supplierCode;

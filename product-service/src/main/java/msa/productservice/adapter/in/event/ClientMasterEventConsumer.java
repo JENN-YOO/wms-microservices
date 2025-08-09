@@ -39,7 +39,7 @@ public class ClientMasterEventConsumer {
             int clientCode = getInt(message, "clientCode");
 
             // 멱등성: 이미 있으면 커밋 후 종료
-            if (clientMasterRepository.existsById(clientCode)) {
+            if (clientMasterRepository.existsById((long) clientCode)) {
                 log.warn("중복 생성 시도: 이미 존재하는 clientCode - {}", clientCode);
                 ack.acknowledge();
                 return;

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import msa.productservice.adapter.in.web.dto.ProductCreateRequest;
 import msa.productservice.adapter.in.web.dto.ProductResponse;
 import msa.productservice.application.port.in.ProductCommandUseCase;
+import msa.productservice.application.port.out.ProductEventPort;
 import msa.productservice.application.port.out.ProductPersistencePort;
 import msa.productservice.config.MDCHelper;
 import msa.productservice.domain.ProductMaster;
@@ -11,12 +12,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class ProductCommandService implements ProductCommandUseCase {
+
     private final ProductPersistencePort productPersistencePort;
+    private final ProductEventPort productEventPort; // 🔹 추가
+
     private static final Logger log = LoggerFactory.getLogger(ProductCommandService.class);
 
     @Override
@@ -30,17 +38,12 @@ public class ProductCommandService implements ProductCommandUseCase {
                 MDCHelper.appendDebug(this.getClass(), "상품명 중복. 등록 실패: " + req.getProductName());
                 return ProductResponse.fail(false, "이미 존재하는 상품명입니다.");
             }
-            String productRegisterType;
-            switch (roleName) {
-                case "ADMIN":
-                    productRegisterType = "A";
-                    break;
-                case "USER":
-                    productRegisterType = "U";
-                    break;
-                default:
-                    productRegisterType = "G";
-            }
+
+            String productRegisterType = switch (roleName) {
+                case "ADMIN" -> "A";
+                case "USER"  -> "U";
+                default      -> "G";
+            };
 
             ProductMaster productMaster = ProductMaster.builder()
                     .clientCode(req.getClientCode())
@@ -74,6 +77,20 @@ public class ProductCommandService implements ProductCommandUseCase {
 
             log.info("[상품등록][성공] 상품ID: {}, 상품명: {}, 등록자: {}", saved.getProductCode(), saved.getProductName(), userId);
             MDCHelper.appendDebug(this.getClass(), "상품 등록 성공. 상품ID: " + saved.getProductCode());
+
+            // ✅ 트랜잭션 커밋 이후 이벤트 발행 (실무 안전패턴)
+            var productCode = saved.getProductCode();
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    try {
+                        productEventPort.publishProductCreated(productCode, Instant.now(), 1L);
+                    } catch (Exception e) {
+                        // 여기서 예외가 나도 트랜잭션은 이미 커밋됨 → 에러만 로깅 & 알림
+                        log.error("[상품등록][이벤트발행실패] productCode={}", productCode, e);
+                    }
+                }
+            });
 
             return ProductResponse.success(true, "상품 등록 성공");
 

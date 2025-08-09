@@ -27,7 +27,8 @@ public class ProductQueryService implements ProductQueryUseCase {
         return products.stream().map(product -> {
             String clientName = "";
             try {
-                clientName = userServiceClient.getClientName(Integer.parseInt(product.getClientCode()));
+                clientName = userServiceClient.getClientName(product.getClientCode().longValue());
+
             } catch (Exception e) {
                 clientName = "조회실패";
             }
