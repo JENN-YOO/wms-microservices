@@ -15,8 +15,8 @@ public class ProductIndexCommandService implements ProductIndexCommandUseCase {
 
     @Override
     @Transactional
-    public void reindexByProductCode(Long productCode) {
-        indexPort.upsertByProductCode(productCode);
+    public void reindexByProductCode(Long productCode, Long eventVersion) {
+        indexPort.upsertByProductCode(productCode, eventVersion);
     }
 
     @Override

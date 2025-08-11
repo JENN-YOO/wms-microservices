@@ -4,5 +4,5 @@ import java.time.Instant;
 
 public interface ProductEventPort {
     void publishProductCreated(long productCode, Instant occurredAt, long version);
-    // 필요 시: void publishProductUpdated(...)
+    // TODO void publishProductUpdated(...)
 }

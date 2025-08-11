@@ -27,7 +27,6 @@ import java.util.Objects;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 
-// ✅ MDC 헬퍼 import (너의 프로젝트 경로에 맞춰 수정)
 import msa.productservice.config.MDCHelper;
 
 @Slf4j
@@ -47,11 +46,18 @@ public class ElasticsearchProductSearchAdapter
 
     // ===== 색인 (상품 단건 업서트) =====
     @Override
-    public void upsertByProductCode(Long productCode) {
+    public void upsertByProductCode(Long productCode, Long eventVersion) {
         Instant start = Instant.now();
-        debug("UPsert 시작 - productCode=" + productCode);
+        debug("UPsert 시작 - productCode=" + productCode + ", eventVersion=" + eventVersion);
 
         try {
+            var existing = esRepository.findById(productCode).orElse(null);
+            if (existing != null && existing.getVersion() != null
+                    && existing.getVersion() >= eventVersion) {
+                debug("이미 최신 버전 존재 - skip (existingVersion=" + existing.getVersion() + ")");
+                return;
+            }
+
             ProductMaster p = productRepo.findById(productCode)
                     .orElseThrow(() -> new IllegalStateException("Product not found: " + productCode));
             Long clientCode = Long.valueOf(p.getClientCode());
@@ -72,10 +78,10 @@ public class ElasticsearchProductSearchAdapter
                     .useYn(p.getUseYn())
                     .keywords(buildKeywords(p))
                     .lastEventAt(Instant.now())
-                    .version(0L)
+                    .version(eventVersion) //이벤트 버전 반영
                     .build();
 
-            debug("ES 저장 시도 - productCode=" + productCode + ", clientCode=" + clientCode);
+            debug("ES 저장 시도 - productCode=" + productCode + ", eventVersion=" + eventVersion);
             esRepository.save(doc); // upsert
             debug("ES 저장 완료 - productCode=" + productCode);
         } catch (Exception e) {

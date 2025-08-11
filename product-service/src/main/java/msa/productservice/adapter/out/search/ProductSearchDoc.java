@@ -32,7 +32,7 @@ public class ProductSearchDoc {
 
     private String  keywords;
 
-    // ✅ Instant를 epoch_millis로 매핑
+    // Instant를 epoch_millis로 매핑
     @Field(type = FieldType.Date, format = DateFormat.epoch_millis)
     private Instant lastEventAt;
 
