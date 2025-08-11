@@ -3,7 +3,7 @@ package msa.productservice.adapter.in.event;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import msa.productservice.adapter.out.persistence.ClientMasterRepository;
-import msa.productservice.config.MDCHelper;
+import msa.productservice.application.port.in.ProductIndexCommandUseCase;
 import msa.productservice.domain.ClientMaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +19,7 @@ import java.time.LocalDate;
 public class ClientMasterEventConsumer {
 
     private final ClientMasterRepository clientMasterRepository;
+    private final ProductIndexCommandUseCase productSearchUseCase;
     private static final Logger log = LoggerFactory.getLogger(ClientMasterEventConsumer.class);
 
     @KafkaListener(
@@ -27,7 +28,7 @@ public class ClientMasterEventConsumer {
             containerFactory = "kafkaListenerContainerFactory"
     )
     @Transactional
-    public void consume(JsonNode message, Acknowledgment ack) {
+    public void insertConsume(JsonNode message, Acknowledgment ack) {
         try {
             String type = getString(message, "type");
             if (!"client_created".equals(type)) {
@@ -63,6 +64,22 @@ public class ClientMasterEventConsumer {
         } catch (Exception e) {
             log.error("Kafka consume 실패", e);
             // 커밋X → Kafka가 재시도하게 놔둠(재처리)
+        }
+    }
+
+    @KafkaListener(
+            topics = "client-updated-topic",
+            groupId = "product-service-group",
+            containerFactory = "kafkaListenerContainerFactory"
+    )
+    @Transactional
+    public void updateConsume(JsonNode message, Acknowledgment ack) {
+        try {
+            int clientCode = message.path("clientCode").asInt();
+            productSearchUseCase.reindexByClientCode((long) clientCode);
+            ack.acknowledge();
+        } catch (Exception e) {
+            log.error("ClientUpdatedEvent consume 실패", e);
         }
     }
 

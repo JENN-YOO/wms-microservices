@@ -75,10 +75,8 @@ public class ProductCommandService implements ProductCommandUseCase {
 
             ProductMaster saved = productPersistencePort.save(productMaster);
 
-            log.info("[상품등록][성공] 상품ID: {}, 상품명: {}, 등록자: {}", saved.getProductCode(), saved.getProductName(), userId);
             MDCHelper.appendDebug(this.getClass(), "상품 등록 성공. 상품ID: " + saved.getProductCode());
 
-            // ✅ 트랜잭션 커밋 이후 이벤트 발행 (실무 안전패턴)
             var productCode = saved.getProductCode();
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
@@ -86,7 +84,6 @@ public class ProductCommandService implements ProductCommandUseCase {
                     try {
                         productEventPort.publishProductCreated(productCode, Instant.now(), 1L);
                     } catch (Exception e) {
-                        // 여기서 예외가 나도 트랜잭션은 이미 커밋됨 → 에러만 로깅 & 알림
                         log.error("[상품등록][이벤트발행실패] productCode={}", productCode, e);
                     }
                 }

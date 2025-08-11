@@ -1,11 +1,15 @@
 package msa.productservice.application.service;
 
 import lombok.RequiredArgsConstructor;
+import msa.productservice.adapter.in.web.dto.ProductSearchResponse;
 import msa.productservice.adapter.in.web.dto.ProductWithClientDto;
 import msa.productservice.adapter.out.FeignClient.UserServiceClient;
 import msa.productservice.adapter.out.persistence.ProductMasterRepository;
 import msa.productservice.application.port.in.ProductQueryUseCase;
+import msa.productservice.application.port.out.ProductSearchIndexPort;
+import msa.productservice.application.port.out.ProductSearchQueryPort;
 import msa.productservice.domain.ProductMaster;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +22,8 @@ public class ProductQueryService implements ProductQueryUseCase {
 
     private final ProductMasterRepository productMasterRepository;
     private final UserServiceClient userServiceClient;
+
+    private final ProductSearchQueryPort queryPort;
 
     @Override
     @Transactional(readOnly = true)
@@ -39,5 +45,14 @@ public class ProductQueryService implements ProductQueryUseCase {
                     .clientName(clientName)
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<ProductSearchResponse> search(Long clientCode, String keyword, int page, int size) {
+        int p = Math.max(page, 0);
+        int s = Math.min(Math.max(size, 1), 100);
+        String k = (keyword == null || keyword.isBlank()) ? null : keyword.trim();
+
+        return queryPort.search(clientCode, k, p, s);
     }
 }

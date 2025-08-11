@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import msa.productservice.application.port.in.ProductSearchUseCase;
+import msa.productservice.application.port.in.ProductIndexCommandUseCase;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProductEventConsumer {
 
-    private final ProductSearchUseCase productSearchUseCase;
+    private final ProductIndexCommandUseCase productSearchUseCase;
 
     @KafkaListener(
             topics = "product-events",

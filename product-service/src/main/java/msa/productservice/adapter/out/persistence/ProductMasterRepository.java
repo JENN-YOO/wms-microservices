@@ -14,7 +14,7 @@ public interface ProductMasterRepository extends JpaRepository<ProductMaster, Lo
     // 기존: 상품명 중복 체크
     Optional<ProductMaster> findByProductName(String productName);
 
-    // 👍 ES 부분 업데이트용: 화주(clientCode)에 속한 상품들의 productCode 목록
+    //  ES 부분 업데이트용: 화주(clientCode)에 속한 상품들의 productCode 목록
     @Query("select p.productCode from ProductMaster p where p.clientCode = :clientCode")
     List<Long> findProductCodesByClientCode(Long clientCode);
 

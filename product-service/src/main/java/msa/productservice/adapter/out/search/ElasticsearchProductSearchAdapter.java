@@ -21,10 +21,14 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+
+// ✅ MDC 헬퍼 import (너의 프로젝트 경로에 맞춰 수정)
+import msa.productservice.config.MDCHelper;
 
 @Slf4j
 @Component
@@ -44,30 +48,42 @@ public class ElasticsearchProductSearchAdapter
     // ===== 색인 (상품 단건 업서트) =====
     @Override
     public void upsertByProductCode(Long productCode) {
-        ProductMaster p = productRepo.findById(productCode)
-                .orElseThrow(() -> new IllegalStateException("Product not found: " + productCode));
-        Long clientCode = Long.valueOf(p.getClientCode());
-        ClientMaster c = clientRepo.findById(clientCode).orElse(null);
+        Instant start = Instant.now();
+        debug("UPsert 시작 - productCode=" + productCode);
 
-        ProductSearchDoc doc = ProductSearchDoc.builder()
-                .productCode(p.getProductCode())
-                .clientCode(clientCode)
-                .clientName(c != null ? c.getClientName() : null)
-                .productName(p.getProductName())
-                .brand(p.getBrand())
-                .style(p.getStyle())
-                .color(p.getColor())
-                .size(p.getSize())
-                .productYear(p.getProductYear())
-                .productSeason(p.getProductSeason())
-                .retailPrice(p.getRetailPrice())
-                .useYn(p.getUseYn())
-                .keywords(buildKeywords(p))
-                .lastEventAt(Instant.now())
-                .version(0L)
-                .build();
+        try {
+            ProductMaster p = productRepo.findById(productCode)
+                    .orElseThrow(() -> new IllegalStateException("Product not found: " + productCode));
+            Long clientCode = Long.valueOf(p.getClientCode());
+            ClientMaster c = clientRepo.findById(clientCode).orElse(null);
 
-        esRepository.save(doc); // upsert
+            ProductSearchDoc doc = ProductSearchDoc.builder()
+                    .productCode(p.getProductCode())
+                    .clientCode(clientCode)
+                    .clientName(c != null ? c.getClientName() : null)
+                    .productName(p.getProductName())
+                    .brand(p.getBrand())
+                    .style(p.getStyle())
+                    .color(p.getColor())
+                    .size(p.getSize())
+                    .productYear(p.getProductYear())
+                    .productSeason(p.getProductSeason())
+                    .retailPrice(p.getRetailPrice())
+                    .useYn(p.getUseYn())
+                    .keywords(buildKeywords(p))
+                    .lastEventAt(Instant.now())
+                    .version(0L)
+                    .build();
+
+            debug("ES 저장 시도 - productCode=" + productCode + ", clientCode=" + clientCode);
+            esRepository.save(doc); // upsert
+            debug("ES 저장 완료 - productCode=" + productCode);
+        } catch (Exception e) {
+            debug("ES 저장 실패 - productCode=" + productCode + ", error=" + e.getMessage());
+            throw e;
+        } finally {
+            debug("UPsert 종료 - productCode=" + productCode + ", elapsedMs=" + elapsedMs(start));
+        }
     }
 
     private String buildKeywords(ProductMaster p) {
@@ -77,20 +93,30 @@ public class ElasticsearchProductSearchAdapter
         append(sb, p.getStyle());
         append(sb, p.getColor());
         append(sb, p.getSize());
-        return sb.toString().trim();
+        String kw = sb.toString().trim();
+        debug("키워드 생성 - productCode=" + p.getProductCode() + ", keywords=\"" + kw + "\"");
+        return kw;
     }
     private void append(StringBuilder sb, String v) { if (v != null && !v.isBlank()) sb.append(v).append(' '); }
 
     // ===== 색인 (화주 변경 → 해당 상품 문서들 부분 업데이트) =====
     @Override
     public void updateClientFields(Long clientCode) {
+        Instant start = Instant.now();
+        debug("화주필드 업데이트 시작 - clientCode=" + clientCode);
+
         var productCodes = productRepo.findProductCodesByClientCode(clientCode);
         var client = clientRepo.findById(clientCode).orElse(null);
         String newClientName = client != null ? client.getClientName() : null;
 
-        if (productCodes.isEmpty()) return;
+        debug("대상 상품수=" + productCodes.size() + ", newClientName=" + newClientName);
 
-        // 간단 처리: 기존 문서 읽고 필드만 변경 후 save (대량이면 bulkUpdate로 전환)
+        if (productCodes.isEmpty()) {
+            debug("업데이트 대상 없음 - clientCode=" + clientCode);
+            return;
+        }
+
+        int updated = 0;
         for (Long pc : productCodes) {
             var existing = esRepository.findById(pc).orElse(null);
             if (existing == null) continue;
@@ -98,23 +124,24 @@ public class ElasticsearchProductSearchAdapter
                 existing.setClientName(newClientName);
                 existing.setLastEventAt(Instant.now());
                 esRepository.save(existing);
+                updated++;
             }
         }
+        debug("화주필드 업데이트 완료 - clientCode=" + clientCode + ", updatedCount=" + updated +
+                ", elapsedMs=" + elapsedMs(start));
     }
 
     // ===== 조회 =====
     @Override
     public Page<ProductSearchResponse> search(Long clientCode, String keyword, int page, int size) {
+        Instant start = Instant.now();
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("productCode")));
 
         // co.elastic QueryBuilders 사용
         var bool = QueryBuilders.bool();
 
         if (clientCode != null) {
-            bool.must(m -> m.term(t -> t
-                    .field("clientCode")
-                    .value(clientCode)
-            ));
+            bool.must(m -> m.term(t -> t.field("clientCode").value(clientCode)));
         }
 
         if (keyword != null && !keyword.isBlank()) {
@@ -122,7 +149,7 @@ public class ElasticsearchProductSearchAdapter
                     .query(keyword)
                     .fields("productName^3", "brand^2", "keywords")
             ));
-            // 또는 simple_query_string 사용 가능:
+            // simple_query_string 사용 예:
             // bool.must(m -> m.simpleQueryString(s -> s.query(keyword).fields("productName^3","brand^2","keywords")));
         }
 
@@ -131,7 +158,14 @@ public class ElasticsearchProductSearchAdapter
                 .withPageable(pageable)
                 .build();
 
+        debug("검색 요청 - clientCode=" + clientCode + ", keyword=\"" + keyword + "\"" +
+                ", page=" + page + ", size=" + size);
+
         SearchHits<ProductSearchDoc> hits = operations.search(q, ProductSearchDoc.class, index());
+
+        debug("ES 응답 - totalHits=" + hits.getTotalHits() +
+                ", tookMs(approx)=" + elapsedMs(start));
+
         var mapped = hits.getSearchHits().stream()
                 .map(h -> {
                     var d = h.getContent();
@@ -149,6 +183,19 @@ public class ElasticsearchProductSearchAdapter
                 })
                 .toList();
 
+        debug("검색 매핑 완료 - returned=" + mapped.size() +
+                ", page=" + page + ", size=" + size +
+                ", elapsedMs=" + elapsedMs(start));
+
         return new PageImpl<>(mapped, pageable, hits.getTotalHits());
+    }
+
+    private void debug(String msg) {
+        MDCHelper.appendDebug(ElasticsearchProductSearchAdapter.class, msg);
+        log.info("[ES-ADAPTER] {}", msg);
+    }
+
+    private static long elapsedMs(Instant start) {
+        return Duration.between(start, Instant.now()).toMillis();
     }
 }
