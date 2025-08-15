@@ -6,13 +6,15 @@ import java.math.BigDecimal;
 
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
+@Builder
 public class ProductWithClientDto {
     private Long productCode;
     private String productName;
     private String brand;
     private BigDecimal retailPrice;
 
-    private Integer clientCode;   // ClientMaster의 clientCode가 int 이므로 Integer 유지
+    private int clientCode;
     private String clientName;
     private String businessCode;
+
 }

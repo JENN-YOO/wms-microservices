@@ -1,5 +1,6 @@
 package msa.productservice.adapter.out.search;
 
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import msa.productservice.adapter.in.web.dto.ProductSearchResponse;
@@ -7,27 +8,23 @@ import msa.productservice.application.port.out.ProductSearchIndexPort;
 import msa.productservice.application.port.out.ProductSearchQueryPort;
 import msa.productservice.adapter.out.persistence.ClientMasterRepository;
 import msa.productservice.adapter.out.persistence.ProductMasterRepository;
+import msa.productservice.config.MDCHelper;
 import msa.productservice.domain.ClientMaster;
 import msa.productservice.domain.ProductMaster;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
+import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
 import java.time.Instant;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
-
-import msa.productservice.config.MDCHelper;
 
 @Slf4j
 @Component
@@ -78,10 +75,9 @@ public class ElasticsearchProductSearchAdapter
                     .useYn(p.getUseYn())
                     .keywords(buildKeywords(p))
                     .lastEventAt(Instant.now())
-                    .version(eventVersion) //이벤트 버전 반영
+                    .version(eventVersion)
                     .build();
 
-            debug("ES 저장 시도 - productCode=" + productCode + ", eventVersion=" + eventVersion);
             esRepository.save(doc); // upsert
             debug("ES 저장 완료 - productCode=" + productCode);
         } catch (Exception e) {
@@ -137,64 +133,159 @@ public class ElasticsearchProductSearchAdapter
                 ", elapsedMs=" + elapsedMs(start));
     }
 
-    // ===== 조회 =====
+    // ===== 조회 (최적화: _source include, track_total_hits, minScore) =====
     @Override
     public Page<ProductSearchResponse> search(Long clientCode, String keyword, int page, int size) {
         Instant start = Instant.now();
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("productCode")));
+        int p = Math.max(page, 0);
+        int s = Math.min(Math.max(size, 1), 100);
 
-        // co.elastic QueryBuilders 사용
+        String[] includes = {
+                "productCode","clientCode","clientName",
+                "productName","brand","style","color","size",
+                "retailPrice"
+        };
+
         var bool = QueryBuilders.bool();
-
         if (clientCode != null) {
             bool.must(m -> m.term(t -> t.field("clientCode").value(clientCode)));
         }
-
         if (keyword != null && !keyword.isBlank()) {
             bool.must(m -> m.multiMatch(mm -> mm
                     .query(keyword)
-                    .fields("productName^3", "brand^2", "keywords")
+                    .fields("productName^3","brand^2","keywords")
             ));
-            // simple_query_string 사용 예:
-            // bool.must(m -> m.simpleQueryString(s -> s.query(keyword).fields("productName^3","brand^2","keywords")));
         }
 
-        Query q = NativeQuery.builder()
+        var builder = NativeQuery.builder()
                 .withQuery(bool.build()._toQuery())
-                .withPageable(pageable)
-                .build();
+                .withPageable(PageRequest.of(p, s, Sort.by(Sort.Order.asc("productCode"))))
+                .withSourceFilter(new FetchSourceFilter(includes, null))
+                .withTrackTotalHits(false);
 
-        debug("검색 요청 - clientCode=" + clientCode + ", keyword=\"" + keyword + "\"" +
-                ", page=" + page + ", size=" + size);
+        if (keyword != null && !keyword.isBlank()) {
+            builder.withMinScore(0.01f);
+        }
+
+        Query q = builder.build();
 
         SearchHits<ProductSearchDoc> hits = operations.search(q, ProductSearchDoc.class, index());
 
-        debug("ES 응답 - totalHits=" + hits.getTotalHits() +
-                ", tookMs(approx)=" + elapsedMs(start));
+        var mapped = hits.getSearchHits().stream().map(h -> {
+            var d = h.getContent();
+            return ProductSearchResponse.builder()
+                    .productCode(d.getProductCode())
+                    .clientCode(d.getClientCode())
+                    .clientName(d.getClientName())
+                    .productName(d.getProductName())
+                    .brand(d.getBrand())
+                    .style(d.getStyle())
+                    .color(d.getColor())
+                    .size(d.getSize())
+                    .retailPrice(d.getRetailPrice())
+                    .build();
+        }).toList();
 
-        var mapped = hits.getSearchHits().stream()
-                .map(h -> {
-                    var d = h.getContent();
-                    return ProductSearchResponse.builder()
-                            .productCode(d.getProductCode())
-                            .clientCode(d.getClientCode())
-                            .clientName(d.getClientName())
-                            .productName(d.getProductName())
-                            .brand(d.getBrand())
-                            .style(d.getStyle())
-                            .color(d.getColor())
-                            .size(d.getSize())
-                            .retailPrice(d.getRetailPrice())
-                            .build();
-                })
-                .toList();
-
-        debug("검색 매핑 완료 - returned=" + mapped.size() +
-                ", page=" + page + ", size=" + size +
-                ", elapsedMs=" + elapsedMs(start));
-
-        return new PageImpl<>(mapped, pageable, hits.getTotalHits());
+        debug("ES 응답 - returned=" + mapped.size() + ", page=" + p + ", size=" + s + ", elapsedMs=" + elapsedMs(start));
+        return new PageImpl<>(mapped, q.getPageable(), hits.getTotalHits());
     }
+
+    // ===== 딥 페이지네이션 (search_after) =====
+    public static class SearchPage<T> {
+        private final List<T> contents;
+        private final List<Object> nextToken;
+        public SearchPage(List<T> contents, List<Object> nextToken) {
+            this.contents = contents; this.nextToken = nextToken;
+        }
+        public List<T> getContents() { return contents; }
+        public List<Object> getNextToken() { return nextToken; }
+    }
+
+    public SearchPage<ProductSearchResponse> searchAfter(
+            Long clientCode, String keyword, int size, @Nullable List<Object> afterSortValues) {
+
+        int s = Math.min(Math.max(size, 1), 100);
+
+        // 정렬: productCode만 (keyword/number 모두 안전)
+        // 만약 유니크가 확실하면 이 한 개로 충분
+        // 나중에 필요하면 createdAt 같은 2차키를 추가
+        Sort sort = Sort.by(Sort.Order.asc("productCode"));
+
+        var bool = QueryBuilders.bool();
+        if (clientCode != null) {
+            bool.must(m -> m.term(t -> t.field("clientCode").value(clientCode)));
+        }
+        if (keyword != null && !keyword.isBlank()) {
+            bool.must(m -> m.multiMatch(mm -> mm
+                    .query(keyword)
+                    .fields("productName^3","brand^2") // keywords 매핑 불확실 → 일단 제외
+            ));
+        }
+
+        String[] includes = {
+                "productCode","clientCode","clientName",
+                "productName","brand","style","color","size",
+                "retailPrice"
+        };
+
+        var builder = NativeQuery.builder()
+                .withQuery(bool.build()._toQuery())
+                .withSort(sort)
+                .withPageable(PageRequest.of(0, s))   // search_after 사용 시 from=0 고정
+                .withTrackTotalHits(false)
+                .withSourceFilter(new FetchSourceFilter(includes, null));
+
+        if (keyword != null && !keyword.isBlank()) {
+            builder.withMinScore(0.01f);
+        }
+
+        if (afterSortValues != null && !afterSortValues.isEmpty()) {
+            builder.withSearchAfter(afterSortValues); //그대로 전달
+        }
+
+        Query q = builder.build();
+
+        try {
+            var hits = operations.search(q, ProductSearchDoc.class, index());
+
+            var items = hits.getSearchHits().stream().map(h -> {
+                var d = h.getContent();
+                return ProductSearchResponse.builder()
+                        .productCode(d.getProductCode())
+                        .clientCode(d.getClientCode())
+                        .clientName(d.getClientName())
+                        .productName(d.getProductName())
+                        .brand(d.getBrand())
+                        .style(d.getStyle())
+                        .color(d.getColor())
+                        .size(d.getSize())
+                        .retailPrice(d.getRetailPrice())
+                        .build();
+            }).collect(java.util.stream.Collectors.toList());
+
+            List<Object> nextToken = null;
+            var lastHit = hits.getSearchHits().isEmpty() ? null
+                    : hits.getSearchHits().get(hits.getSearchHits().size() - 1);
+            if (lastHit != null && lastHit.getSortValues() != null && !lastHit.getSortValues().isEmpty()) {
+                nextToken = lastHit.getSortValues();
+            }
+
+            return new SearchPage<>(items, nextToken);
+
+        } catch (org.springframework.dao.DataAccessException e) {
+            // 루트 원인 로그 터지면 바로 찍히게
+            Throwable root = e.getCause();
+            if (root instanceof co.elastic.clients.elasticsearch._types.ElasticsearchException ee) {
+                log.error("[ES] type={}, reason={}", ee.error().type(), ee.error().reason(), ee);
+            } else {
+                log.error("[ES] search failed", e);
+            }
+            throw e;
+        }
+    }
+
+
+
 
     private void debug(String msg) {
         MDCHelper.appendDebug(ElasticsearchProductSearchAdapter.class, msg);
@@ -202,6 +293,6 @@ public class ElasticsearchProductSearchAdapter
     }
 
     private static long elapsedMs(Instant start) {
-        return Duration.between(start, Instant.now()).toMillis();
+        return java.time.Duration.between(start, Instant.now()).toMillis();
     }
 }

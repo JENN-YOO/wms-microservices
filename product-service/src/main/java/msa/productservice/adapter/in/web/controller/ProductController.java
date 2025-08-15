@@ -8,6 +8,9 @@ import msa.productservice.application.port.in.ProductCommandUseCase;
 import msa.productservice.application.port.in.ProductQueryUseCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -71,7 +74,14 @@ public class ProductController {
         }
     }
 
-
+    @GetMapping("/products-with-clients")
+    public Page<ProductWithClientDto> getProductsWithClients(
+            @RequestParam(required = false) Long clientCode,
+            @RequestParam(required = false) String keyword,
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
+        return productQueryUseCase.getProductsWithClients(clientCode, keyword, pageable);
+    }
 
 }
 

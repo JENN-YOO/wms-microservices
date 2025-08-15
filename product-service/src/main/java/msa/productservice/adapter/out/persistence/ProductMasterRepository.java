@@ -1,5 +1,7 @@
 package msa.productservice.adapter.out.persistence;
 
+import feign.Param;
+import msa.productservice.adapter.in.web.dto.ProductWithClientDto;
 import msa.productservice.domain.ProductMaster;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,4 +29,44 @@ public interface ProductMasterRepository extends JpaRepository<ProductMaster, Lo
 
     // (옵션) 총 개수만 빠르게 알고 싶을 때
     long countByClientCode(Long clientCode);
+
+    // ★ 조인 + 페이징
+    @Query(
+            value =
+                    "select new msa.productservice.adapter.in.web.dto.ProductWithClientDto(" +
+                            "  p.productCode, p.productName, p.brand, p.retailPrice, " +
+                            "  c.clientCode, c.clientName, c.businessCode" +
+                            ") " +
+                            "from ProductMaster p " +
+                            "join ClientMaster c on p.clientCode = c.clientCode " +
+                            "where (:clientCode is null or p.clientCode = :clientCode) " +
+                            "  and (:keyword is null or " +
+                            "       lower(p.productName) like lower(concat('%', :keyword, '%')) or " +
+                            "       lower(p.brand)       like lower(concat('%', :keyword, '%')) or " +
+                            "       lower(p.style)       like lower(concat('%', :keyword, '%')) or " +
+                            "       lower(p.color)       like lower(concat('%', :keyword, '%')) or " +
+                            "       lower(p.size)        like lower(concat('%', :keyword, '%')) or " +
+                            "       lower(p.productSku)  like lower(concat('%', :keyword, '%')) or " +
+                            "       lower(c.clientName)  like lower(concat('%', :keyword, '%')) " +
+                            "  )",
+            countQuery =
+                    "select count(p) " +
+                            "from ProductMaster p " +
+                            "join ClientMaster c on p.clientCode = c.clientCode " +
+                            "where (:clientCode is null or p.clientCode = :clientCode) " +
+                            "  and (:keyword is null or " +
+                            "       lower(p.productName) like lower(concat('%', :keyword, '%')) or " +
+                            "       lower(p.brand)       like lower(concat('%', :keyword, '%')) or " +
+                            "       lower(p.style)       like lower(concat('%', :keyword, '%')) or " +
+                            "       lower(p.color)       like lower(concat('%', :keyword, '%')) or " +
+                            "       lower(p.size)        like lower(concat('%', :keyword, '%')) or " +
+                            "       lower(p.productSku)  like lower(concat('%', :keyword, '%')) or " +
+                            "       lower(c.clientName)  like lower(concat('%', :keyword, '%')) " +
+                            "  )"
+    )
+    Page<ProductWithClientDto> searchProductsWithClients(
+            @Param("clientCode") Long clientCode,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
 }
